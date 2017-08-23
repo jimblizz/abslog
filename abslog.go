@@ -17,6 +17,8 @@ func NewAbsLog (environment string, key string) AbsLog  {
 		}
 		defer f.Close()
 	}
+	
+	self.Environment = environment
 
 	return AbsLog{
 		Log: logger.New(key),
@@ -27,6 +29,8 @@ type AbsLog struct {
 	Log 			*logger.Logger
 	Le 				*le_go.Logger
 	UseLogentries 	bool
+	Environment     string
+	Hostname	string
 }
 
 func (self *AbsLog) SetUseLogentries(token string) {
@@ -37,6 +41,7 @@ func (self *AbsLog) SetUseLogentries(token string) {
 		panic(err)
 	}
 	self.UseLogentries = true
+	self.Hostname = os.Hostname()
 	//defer self.Le.Close()
 
 	return
@@ -57,13 +62,13 @@ func (self AbsLog) addLog (level string, msg string) {
 	if level == "error" {
 		self.Log.Error(msg)
 		if self.UseLogentries {
-			self.Le.Println("{\"level\": error, \"msg\": " + msg + "}")
+			self.Le.Println("{\"hostname\": \"" + self.Hostname + "\", \"level\": \"error\", \"msg\": " + msg + "}")
 		}
 
 	} else {
 		self.Log.Info(msg)
 		if self.UseLogentries {
-			self.Le.Println("{\"level\": \"info\", \"msg\": \"" + msg + "\"}")
+			self.Le.Println("{\"hostname\": \"" + self.Hostname + "\", \"level\": \"info\", \"msg\": \"" + msg + "\"}")
 		}
 	}
 }
